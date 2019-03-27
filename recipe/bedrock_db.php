@@ -26,7 +26,7 @@ use Dotenv;
  */
 $getLocalEnv = function () use ($getUBPath) {
 	$localRoot = get('local_bedrock_root');
-	$localEnv = new Dotenv\Dotenv($localRoot, '.env');
+	$localEnv = Dotenv\Dotenv::create($localRoot, '.env');
 	$localEnv->overload();
 	$localUrl = getenv('WP_HOME');
 
@@ -53,7 +53,7 @@ $getRemoteEnv = function () use ($getUBPath) {
 	}
 	$tmpEnvFile = $localUBRoot . '/.env-remote';
 	download(get('deploy_path') . '/release' . '/.env', $tmpEnvFile);
-	$remoteEnv = new Dotenv\Dotenv($localRoot, '.env-remote');
+	$remoteEnv = Dotenv\Dotenv::create($localRoot, '.env-remote');
 	$remoteEnv->overload();
 	$remoteUrl = getenv('WP_HOME');
     // Cleanup tempfile

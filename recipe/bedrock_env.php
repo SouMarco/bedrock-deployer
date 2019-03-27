@@ -67,6 +67,7 @@ task( 'bedrock:env', function () {
     $db_name = ask( get( 'stage' ) . ' server WordPress DB name' );
     $db_user = ask( get( 'stage' ) . ' server WordPress DB user' );
     $db_pass = askHiddenResponse( get( 'stage' ) . ' server WordPress DB password' );
+    $db_table_pre = ask( get( 'stage' ) . ' server WordPress DB table prefix' );
     $db_host = ask( get( 'stage' ) . ' server WordPress DB host', '127.0.0.1' );
     $wp_env  = askChoice( get( 'stage' ) . ' server ENV', ['development' => 'development', 'staging' => 'staging', 'production' => 'production'], 'staging' );
     $wp_prot = askChoice( get( 'stage' ) . ' server protocol', ['http' => 'http', 'https' => 'https'], 'http' );
@@ -83,6 +84,7 @@ DB_HOST='{$db_host}'
 WP_ENV='{$wp_env}'
 WP_HOME='{$wp_prot}://{$wp_domain}'
 WP_SITEURL='{$wp_prot}://{$wp_domain}/wp'
+DB_PREFIX='{$db_table_pre}'
 DOMAIN_CURRENT_SITE='{$wp_domain}'
 PROTOCOL='{$wp_prot}'
 
