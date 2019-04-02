@@ -34,7 +34,6 @@ $getUBPath = function ($fullPath) {
 /**
  * Create a dump folder to store all backup and dump files from Deployer tasks
  * 
- * TODO: follow 'test and testLocally' issue to make this task work correctelly
  */
 desc('Create dump folder');
 task('bedrock:prepare', function () {
@@ -42,19 +41,15 @@ task('bedrock:prepare', function () {
 	$localBedrock = get('local_bedrock_root');
 	$remoteBedrock = get('deploy_path');
 
-	// there are a dump folder?
-	// BUG :: Deployer thus not run correctelly 'test' and 'testLocally'
-	// see this issue: https://github.com/deployphp/deployer/issues/1577 
-	// if (testLocally('[-d ' . $localBedrock . '/dump]')) {
-	// 	writeln("<comment>Local machine already has a dump folder!</comment>");
-	// 	return;
-	// }
-	// if (test('[-d ' . $remoteBedrock . '/dump]')) {
-	// 	writeln("<comment>Remote machine already has a dump folder!</comment>");
-	// 	return;
+	// create dump folder if not exist on local machine
+	// TODO
+	// tried this 2 approaches but doesn't work!!
+	// if (testLocally("[! -d $localBedrock ]")) {
+	// 	runLocally("cd $localBedrock && mkdir {{dump_folder}} ");
 	// }
 
-	runlocally("cd {$localBedrock} && mkdir {{dump_folder}}");
-	run("cd {$remoteBedrock} && mkdir {{dump_folder}}");
+	// runLocally("cd $localBedrock && if [ ! -d {{dump_folder}} ]; then mkdir {{dump_folder}}; fi");
 
+	// create dump folder if not exist on remote machine
+	run("cd $remoteBedrock && if [ ! -d {{dump_folder}} ]; then mkdir {{dump_folder}}; fi");
 });
