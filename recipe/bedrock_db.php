@@ -52,7 +52,7 @@ $getRemoteEnv = function () use ($getUBPath) {
 		$localUBRoot = $getUBPath($localRoot);
 	}
 	$tmpEnvFile = $localUBRoot . '/.env-remote';
-	download(get('deploy_path') . '/release' . '/.env', $tmpEnvFile);
+	download(get('deploy_path') . '/current' . '/.env', $tmpEnvFile);
 	$remoteEnv = Dotenv\Dotenv::create($localRoot, '.env-remote');
 	$remoteEnv->overload();
 	$remoteUrl = getenv('WP_HOME');
@@ -91,7 +91,7 @@ task('pull:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	$remoteRoot = get('deploy_path');
 
 	// remote Wordpress wp-config.php file path
-	$remoteWP = $remoteRoot . '/release/web';
+	$remoteWP = $remoteRoot . '/current/web';
 
 	// local and remote dump folders
 	$localDump = $localRoot . '/' . get('dump_folder');
