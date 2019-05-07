@@ -52,11 +52,11 @@ $getRemoteEnv = function () use ($getUBPath) {
 		$localUBRoot = $getUBPath($localRoot);
 	}
 	$tmpEnvFile = $localUBRoot . '/.env-remote';
-	download(get('deploy_path') . '/current' . '/.env', $tmpEnvFile);
+	download(get('deploy_path') . '/release' . '/.env', $tmpEnvFile);
 	$remoteEnv = Dotenv\Dotenv::create($localRoot, '.env-remote');
 	$remoteEnv->overload();
 	$remoteUrl = getenv('WP_HOME');
-    // Cleanup tempfile
+	// Cleanup tempfile
 	runLocally("rm {$tmpEnvFile}");
 
 	if (!$remoteUrl) {
@@ -108,51 +108,51 @@ task('pull:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	writeln("<comment>Exporting server DB to {$exportAbsFile}</comment>");
 	run("cd {$remoteWP} && wp db export {$exportAbsFile}");
 
-  // Download db export
+	// Download db export
 	$downloadedExport = $localUBDump . '/' . $exportFilename;
 	writeln("<comment>Downloading DB export to {$downloadedExport}</comment>");
 	download($exportAbsFile, $downloadedExport);
 
-  // Cleanup exports on server
+	// Cleanup exports on server
 	writeln("<comment>Cleaning up {$exportAbsFile} on server</comment>");
 	run("rm {$exportAbsFile}");
 
-  // Create backup of local DB
+	// Create backup of local DB
 	$backupFilename = '_db_local_' . date('Y-m-d_H-i-s') . '.sql';
 	$vagrantDump = $vagrantRoot . '/' . get('dump_folder');
 	$backupAbsFile = $vagrantDump . '/' . $backupFilename;
 	writeln("<comment>Making backup of DB on local machine to {$backupAbsFile}</comment>");
 	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp db export {$backupAbsFile}\"");
 
-  // Empty local DB
+	// Empty local DB
 	writeln("<comment>Reset server DB</comment>");
 	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp db reset\"");
 
-  // Import export file
+	// Import export file
 	writeln("<comment>Importing {$downloadedExport}</comment>");
 	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp db import {$vagrantDump}/{$exportFilename}\"");
 
-  // Load local .env file and get local WP URL
+	// Load local .env file and get local WP URL
 	if (!$localUrl = $getLocalEnv()) {
 		return;
 	}
 
-  // Load remote .env file and get remote WP URL
+	// Load remote .env file and get remote WP URL
 	if (!$remoteUrl = $getRemoteEnv()) {
 		return;
 	}
 
-  // Also get domain without protocol and trailing slash
+	// Also get domain without protocol and trailing slash
 	$localDomain = $urlToDomain($localUrl);
 	$remoteDomain = $urlToDomain($remoteUrl);
 
-  // Update URL in DB
-  // In a multisite environment, the DOMAIN_CURRENT_SITE in the .env file uses the new remote domain.
-  // In the DB however, this new remote domain doesn't exist yet before search-replace. So we have
-  // to specify the old (remote) domain as --url parameter.
+	// Update URL in DB
+	// In a multisite environment, the DOMAIN_CURRENT_SITE in the .env file uses the new remote domain.
+	// In the DB however, this new remote domain doesn't exist yet before search-replace. So we have
+	// to specify the old (remote) domain as --url parameter.
 	writeln("<comment>Updating the URLs in the DB</comment>");
 	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp search-replace '{$remoteUrl}' '{$localUrl}' --url='{$remoteDomain}' --network\"");
-  // Also replace domain (multisite WP also uses domains without protocol in DB)
+	// Also replace domain (multisite WP also uses domains without protocol in DB)
 	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp search-replace '{$remoteDomain}' '{$localDomain}' --url='{$remoteDomain}' --network\"");
 });
 
@@ -179,13 +179,13 @@ task('push:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	$vagrantDir = get('vagrant_dir');
 	$vagrantRoot = get('vagrant_root');
 
-  // Export db on Vagrant server
+	// Export db on Vagrant server
 	$exportFilename = '_db_local_' . date('Y-m-d_H-i-s') . '.sql';
 	$vagrantDump = $vagrantRoot . '/' . get('dump_folder');
 	$exportAbsFile = $localUBDump . '/' . $exportFilename;
 	writeln("<comment>Exporting Vagrant DB to {$exportAbsFile}</comment>");
 	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp db export {$vagrantDump}/{$exportFilename}\"");
-	
+
 	// Upload export to server
 	$uploadedExport = $remoteDump . '/' . $exportFilename;
 	writeln("<comment>Uploading export to {$uploadedExport} on server</comment>");
@@ -197,39 +197,38 @@ task('push:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	writeln("<comment>Making backup of DB on server to {$backupAbsFile}</comment>");
 	run("cd {$remoteWP} && wp db export {$backupAbsFile}");
 
-  // Empty server DB
+	// Empty server DB
 	writeln("<comment>Reset server DB</comment>");
 	run("cd {$remoteWP} && wp db reset");
 
-  // Import export file
+	// Import export file
 	writeln("<comment>Importing {$uploadedExport}</comment>");
 	run("cd {$remoteWP} && wp db import {$uploadedExport}");
 
-  // Load local .env file and get local WP URL
+	// Load local .env file and get local WP URL
 	if (!$localUrl = $getLocalEnv()) {
 		return;
 	}
 
-    // Load remote .env file and get remote WP URL
+	// Load remote .env file and get remote WP URL
 	if (!$remoteUrl = $getRemoteEnv()) {
 		return;
 	}
 
-  // Also get domain without protocol and trailing slash
+	// Also get domain without protocol and trailing slash
 	$localDomain = $urlToDomain($localUrl);
 	$remoteDomain = $urlToDomain($remoteUrl);
 
-   // Update URL in DB
-   // In a multisite environment, the DOMAIN_CURRENT_SITE in the .env file uses the new remote domain.
-   // In the DB however, this new remote domain doesn't exist yet before search-replace. So we have
-   // to specify the old (local) domain as --url parameter.
+	// Update URL in DB
+	// In a multisite environment, the DOMAIN_CURRENT_SITE in the .env file uses the new remote domain.
+	// In the DB however, this new remote domain doesn't exist yet before search-replace. So we have
+	// to specify the old (local) domain as --url parameter.
 	writeln("<comment>Updating the URLs in the DB</comment>");
 	run("cd {$remoteWP} && wp search-replace \"{$localUrl}\" \"{$remoteUrl}\" --skip-themes --url='{$localDomain}' --network");
-  // Also replace domain (multisite WP also uses domains without protocol in DB)
+	// Also replace domain (multisite WP also uses domains without protocol in DB)
 	run("cd {$remoteWP} && wp search-replace \"{$localDomain}\" \"{$remoteDomain}\" --skip-themes --url='{$localDomain}' --network");
 
-  // Cleanup uploaded file
+	// Cleanup uploaded file
 	writeln("<comment>Cleaning up {$uploadedExport} from server</comment>");
 	run("rm {$uploadedExport}");
-
 });
