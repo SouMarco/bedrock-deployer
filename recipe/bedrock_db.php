@@ -126,7 +126,7 @@ task('pull:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 
 	// Empty local DB
 	writeln("<comment>Reset server DB</comment>");
-	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp db reset\"");
+	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp db reset --yes\"");
 
 	// Import export file
 	writeln("<comment>Importing {$downloadedExport}</comment>");
@@ -199,7 +199,7 @@ task('push:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 
 	// Empty server DB
 	writeln("<comment>Reset server DB</comment>");
-	run("cd {$remoteWP} && wp db reset");
+	run("cd {$remoteWP} && wp db reset --yes");
 
 	// Import export file
 	writeln("<comment>Importing {$uploadedExport}</comment>");
