@@ -52,7 +52,15 @@ $getRemoteEnv = function () use ($getUBPath) {
 		$localUBRoot = $getUBPath($localRoot);
 	}
 	$tmpEnvFile = $localUBRoot . '/.env-remote';
-	download(get('deploy_path') . '/release' . '/.env', $tmpEnvFile);
+
+	$remoteEnvFile = get('deploy_path') . '/release' . '/.env';
+	// for a deploy, get .env from release  folder
+	if(test("[ -f  $remoteEnvFile ]")){
+		download($remoteEnvFile, $tmpEnvFile);
+	} else {
+		// for a pull, get .env from current  folder
+		download(get('deploy_path') . '/current' . '/.env', $tmpEnvFile);
+	}
 	$remoteEnv = Dotenv\Dotenv::create($localRoot, '.env-remote');
 	$remoteEnv->overload();
 	$remoteUrl = getenv('WP_HOME');
