@@ -79,7 +79,7 @@ task('backup:remote_files', function () {
 		}
 		// Add everything from synced directory to tar, but exclude previous backups
 		writeln("<comment>Create a backup from sync directories on {$remoteDump}/{$backupFilename}<comment>");
-		run("cd {$serverDir} && tar --warning=no-file-changed -czf {$remoteDump}/{$backupFilename} .");
+		run("cd {$serverDir} && tar --warning=no-file-changed -czf {$remoteDump}/{$backupFilename} .", ['timeout' => null]);
 	};
 
 });
@@ -104,7 +104,7 @@ task('backup:local_files', function () use ($getUBPath) {
 		}
 		// Add everything from synced directory to zip, but exclude previous backups
 		writeln("<comment>Create a backup from sync directories on {$localDump}/{$backupFilename}<comment>");
-		runLocally("cd {$localDir} && tar warning=no-file-changed -czf {$localDump}/{$backupFilename} .");
+		runLocally("cd {$localDir} && tar warning=no-file-changed -czf {$localDump}/{$backupFilename} .", ['timeout' => null]);
 	};
 
 });

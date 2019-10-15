@@ -114,7 +114,7 @@ task('pull:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	$exportFilename = '_db_remote_' . date('Y-m-d_H-i-s') . '.sql';
 	$exportAbsFile = $remoteDump . '/' . $exportFilename;
 	writeln("<comment>Exporting server DB to {$exportAbsFile}</comment>");
-	run("cd {$remoteWP} && wp db export {$exportAbsFile}");
+	run("cd {$remoteWP} && wp db export {$exportAbsFile}", ['timeout' => null]);
 
 	// Download db export
 	$downloadedExport = $localUBDump . '/' . $exportFilename;
@@ -211,7 +211,7 @@ task('push:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 
 	// Import export file
 	writeln("<comment>Importing {$uploadedExport}</comment>");
-	run("cd {$remoteWP} && wp db import {$uploadedExport}");
+	run("cd {$remoteWP} && wp db import {$uploadedExport}", ['timeout' => null]);
 
 	// Load local .env file and get local WP URL
 	if (!$localUrl = $getLocalEnv()) {
@@ -232,9 +232,9 @@ task('push:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	// In the DB however, this new remote domain doesn't exist yet before search-replace. So we have
 	// to specify the old (local) domain as --url parameter.
 	writeln("<comment>Updating the URLs in the DB</comment>");
-	run("cd {$remoteWP} && wp search-replace \"{$localUrl}\" \"{$remoteUrl}\" --skip-themes --url='{$localDomain}' --network");
+	run("cd {$remoteWP} && wp search-replace \"{$localUrl}\" \"{$remoteUrl}\" --skip-themes --url='{$localDomain}' --network", ['timeout' => null]);
 	// Also replace domain (multisite WP also uses domains without protocol in DB)
-	run("cd {$remoteWP} && wp search-replace \"{$localDomain}\" \"{$remoteDomain}\" --skip-themes --url='{$localDomain}' --network");
+	run("cd {$remoteWP} && wp search-replace \"{$localDomain}\" \"{$remoteDomain}\" --skip-themes --url='{$localDomain}' --network", ['timeout' => null]);
 
 	// Cleanup uploaded file
 	writeln("<comment>Cleaning up {$uploadedExport} from server</comment>");
