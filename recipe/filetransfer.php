@@ -67,16 +67,19 @@ task('backup:remote_files', function () {
 
 	foreach (get('sync_dirs') as $localDir => $serverDir) {
 
-		$backupFilename = '_remote_upload_backup_' . date('Y-m-d_H-i-s') . '.zip';
+        //get folder name
+        preg_match('/([a-zA-z0-9])+\/$/', $serverDir, $folderName);
+
+		$backupFilename = '_remote_' . substr($folderName[0], 0, -1) . '_backup_' . date('Y-m-d_H-i-s') . '.tar.gz';
 
     // Note: sync_dirs can have a trailing slash (which means, sync only the content of the specified directory)
 		if (substr($serverDir, -1) == '/') {
 		} else {
 			$serverDir = $serverDir . '/';
 		}
-		// Add everything from synced directory to zip, but exclude previous backups
+		// Add everything from synced directory to tar, but exclude previous backups
 		writeln("<comment>Create a backup from sync directories on {$remoteDump}/{$backupFilename}<comment>");
-		run("cd {$serverDir} && zip -r {$remoteDump}/{$backupFilename} .");
+		run("cd {$serverDir} && tar --warning=no-file-changed -czf {$remoteDump}/{$backupFilename} .");
 	};
 
 });
@@ -89,7 +92,10 @@ task('backup:local_files', function () use ($getUBPath) {
 
 	foreach (get('sync_dirs') as $localDir => $serverDir) {
 
-		$backupFilename = '_local_upload_backup_' . date('Y-m-d_H-i-s') . '.zip';
+        //get folder name
+        preg_match('/([a-zA-z0-9])+\/$/', $serverDir, $folderName);
+
+		$backupFilename = '_local_' . substr($folderName[0]) . '_backup_' . date('Y-m-d_H-i-s') . '.tar.gz';
 
   	// Note: sync_dirs can have a trailing slash (which means, sync only the content of the specified directory)
 		if (substr($localDir, -1) == '/') {
@@ -98,7 +104,7 @@ task('backup:local_files', function () use ($getUBPath) {
 		}
 		// Add everything from synced directory to zip, but exclude previous backups
 		writeln("<comment>Create a backup from sync directories on {$localDump}/{$backupFilename}<comment>");
-		runLocally("cd {$localDir} && zip -r {$localDump}/{$backupFilename} .");
+		runLocally("cd {$localDir} && tar warning=no-file-changed -czf {$localDump}/{$backupFilename} .");
 	};
 
 });
