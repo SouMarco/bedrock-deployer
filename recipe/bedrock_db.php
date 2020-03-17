@@ -159,9 +159,9 @@ task('pull:db', function () use ($getLocalEnv, $getRemoteEnv, $urlToDomain, $get
 	// In the DB however, this new remote domain doesn't exist yet before search-replace. So we have
 	// to specify the old (remote) domain as --url parameter.
 	writeln("<comment>Updating the URLs in the DB</comment>");
-	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp search-replace '{$remoteUrl}' '{$localUrl}' --url='{$remoteDomain}' --network\"");
+	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp search-replace '{$remoteUrl}' '{$localUrl}' --url='{$remoteDomain}' --network\"", ['timeout' => null]);
 	// Also replace domain (multisite WP also uses domains without protocol in DB)
-	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp search-replace '{$remoteDomain}' '{$localDomain}' --url='{$remoteDomain}' --network\"");
+	runLocally("cd {$vagrantDir} && vagrant ssh -- -t \"cd {$vagrantRoot}/web; wp search-replace '{$remoteDomain}' '{$localDomain}' --url='{$remoteDomain}' --network\"", ['timeout' => null]);
 });
 
 desc('Pushes DB from local machine to server and installs it, after having made a backup of server DB');
